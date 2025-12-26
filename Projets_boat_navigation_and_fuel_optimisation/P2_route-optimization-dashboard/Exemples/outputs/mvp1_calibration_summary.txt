@@ -1,0 +1,13 @@
+Fuel Model Calibration Results
+==================================================
+
+R² Score: -0.0000
+RMSE: 119.57 L/h
+MAE: 95.07 L/h
+N Samples: 1440
+
+Coefficients:
+  a (speed³): 0.0007
+  b (wind²): 0.0000
+  c (wave): 0.0000
+  d (base): 342.44

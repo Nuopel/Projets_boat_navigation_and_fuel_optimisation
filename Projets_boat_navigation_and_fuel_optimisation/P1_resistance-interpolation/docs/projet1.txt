@@ -1,0 +1,256 @@
+# Project 1: Ship Performance Surface Interpolation
+## Advanced Interpolation Techniques for Sparse Hydrodynamic Data
+
+---
+
+## 📋 Objectif Principal
+
+Évaluer et comparer trois méthodes d'interpolation avancées (Kriging, Radial Basis Functions, Splines) pour prédire les performances hydrodynamiques à partir de données expérimentales éparses. Le projet utilise le dataset UCI Yacht Hydrodynamics comme cas d'étude réel, complété par des données synthétiques pour validation contrôlée.
+
+**Contexte métier:** Dans l'industrie maritime, les essais en bassin et les trials en mer sont coûteux. Les ingénieurs doivent interpoler entre des points de mesure limités pour prédire les performances sur tout le domaine opérationnel. Ce projet démontre les techniques d'interpolation essentielles pour cette problématique.
+
+---
+
+## 🎯 Responsabilités du Poste Visées
+
+- ✅ **Data Interpolation** (PRIMARY) - Implémentation de Kriging, RBF, et Splines explicitement mentionnées dans l'offre
+- ✅ **Data Analysis** - Analyse de données expérimentales, feature engineering, validation
+- ✅ **Collaboration** - Comparaison méthodologique pour recommandations techniques
+
+---
+
+## 📊 Problème à Résoudre
+
+### Question Centrale
+Comment prédire avec précision la résistance hydrodynamique R pour n'importe quelle combinaison (Vitesse, Tirant d'eau) quand on ne dispose que de mesures éparses et coûteuses?
+
+### Domaine d'Application
+- **Variable 1:** Vitesse V (10-25 nœuds) - dérivée du nombre de Froude
+- **Variable 2:** Tirant d'eau T (6-10 m) - proxy dérivé du ratio largeur/tirant d'eau
+- **Cible:** Résistance résiduelle R (coefficient adimensionnel)
+
+### Challenge Technique
+Avec seulement 20-50 points de mesure, reconstruire une surface continue pour des milliers de conditions opérationnelles potentielles, tout en:
+- Minimisant l'erreur de prédiction
+- Quantifiant l'incertitude
+- Maintenant un coût de calcul raisonnable
+- Gérant le bruit expérimental
+
+---
+
+## 🔬 Approche Méthodologique
+
+### Phase 1: Validation sur Données Synthétiques
+**Objectif:** Établir un benchmark avec vérité terrain connue
+
+- Génération d'une surface de résistance physiquement réaliste
+- Échantillonnage épars contrôlé (10 à 100 points)
+- Ajout de bruit gaussien pour simuler incertitudes expérimentales
+- Validation des trois méthodes d'interpolation sur ce cas maîtrisé
+
+**Intérêt:** Permet de mesurer objectivement la performance des méthodes puisque la vraie surface est connue.
+
+### Phase 2: Application au Dataset UCI Yacht Hydrodynamics
+**Objectif:** Démontrer l'applicabilité sur données réelles
+
+- **Dataset:** 308 essais expérimentaux sur 22 carènes de yachts
+- **Source:** UCI Machine Learning Repository / Kaggle
+- **Features:** 6 paramètres hydrodynamiques adimensionnels
+- **Target:** Résistance résiduelle par unité de déplacement
+
+**Dérivation (V, T):**
+- Vitesse: V = Froude × √(g×L) avec longueur de référence L=10m
+- Tirant d'eau: T = Beam_fixe / (ratio B/T) avec largeur fixée à 3m
+
+**Note importante:** Ces dérivations créent un domaine (vitesse, draft) pour l'interpolation. Les valeurs absolues sont des proxys pour démonstration, mais la méthodologie d'interpolation reste valide et transférable aux navires commerciaux.
+
+---
+
+## 🛠️ Méthodes d'Interpolation à Comparer
+
+### 1. Kriging / Gaussian Process Regression
+**Principe:** Interpolation stochastique avec quantification d'incertitude
+
+**Avantages:**
+- Fournit des intervalles de confiance sur chaque prédiction
+- Excellent pour données très éparses
+- Justification statistique rigoureuse
+
+**Limitations:**
+- Coût computationnel O(n³) - limite à quelques centaines de points
+- Nécessite choix de kernel approprié
+
+**Cas d'usage:** Quand l'incertitude doit être quantifiée (analyses de risque, optimisation robuste)
+
+### 2. Radial Basis Functions (RBF)
+**Principe:** Combinaison de fonctions de base centrées sur les points d'échantillonnage
+
+**Avantages:**
+- Très flexible pour points irrégulièrement espacés
+- Pas d'hypothèse sur la grille
+- Plusieurs kernels disponibles (multiquadric, thin-plate, gaussian)
+
+**Limitations:**
+- Choix du kernel et du paramètre de forme non trivial
+- Peut sur-ajuster avec paramètres mal choisis
+
+**Cas d'usage:** Données dispersées dans l'espace, géométries irrégulières
+
+### 3. Splines Bivariées
+**Principe:** Interpolation polynomiale par morceaux avec continuité assurée
+
+**Avantages:**
+- Très rapide en calcul
+- Paramètre de lissage pour contrôler le sur-ajustement
+- Bien établi mathématiquement
+
+**Limitations:**
+- Préfère grilles régulières ou semi-régulières
+- Moins flexible pour géométries complexes
+
+**Cas d'usage:** Données relativement denses, besoin de vitesse de calcul
+
+---
+
+## 📈 Métriques de Comparaison
+
+### Performance Prédictive
+- **RMSE** (Root Mean Square Error) - erreur quadratique moyenne
+- **MAE** (Mean Absolute Error) - erreur absolue moyenne
+- **R²** - coefficient de détermination
+- **Erreur maximale** - pire cas observé
+
+### Efficacité Computationnelle
+- Temps d'entraînement (fit)
+- Temps de prédiction (sur grille 100×100)
+- Empreinte mémoire
+
+### Robustesse
+- Comportement avec bruit (SNR 10dB vs 20dB)
+- Convergence selon nombre de points (10, 20, 50, 100, 308)
+- Qualité de l'extrapolation hors domaine d'entraînement
+
+### Applicabilité Pratique
+- Facilité d'implémentation
+- Stabilité numérique
+- Besoin en hyperparamètres
+
+---
+
+## 📦 Livrables
+
+### 1. Implémentations Techniques
+Trois modules d'interpolation avec API unifiée, utilisables avec scikit-learn et scipy
+
+### 2. Analyses Comparatives
+- Tableaux de benchmarks quantitatifs
+- Tests de convergence et sensibilité
+- Recommandations par cas d'usage
+
+### 3. Visualisations
+- **Surfaces 3D:** R(V, T) interpolées par chaque méthode
+- **Cartes d'erreur:** Distribution spatiale des erreurs de prédiction
+- **Courbes de convergence:** Performance vs nombre de points d'échantillonnage
+- **Cartes d'incertitude:** Variance prédictive pour Kriging
+- **Benchmarks temps:** Comparaison des performances computationnelles
+
+### 4. Documentation
+- Rapport technique décrivant les méthodes et résultats
+- Recommandations d'usage selon le contexte
+- Justification de la transférabilité aux navires commerciaux
+
+---
+
+## 🚢 Pertinence pour la Prédiction de Performance Navale
+
+### Loi de Similitude de Froude
+Les essais sur modèles réduits (yachts, bassins de carène) prédisent le comportement des navires réels via le nombre de Froude. Ce projet utilise des données à échelle yacht, mais la méthodologie est **identique** pour les navires commerciaux.
+
+### Transférabilité Directe
+Les méthodes d'interpolation développées s'appliquent aux problématiques d'optimisation de performance navale:
+
+**Surfaces de résistance en eau calme:**
+- R_calm = f(vitesse, déplacement)
+- Interpolation entre essais en bassin espacés
+
+**Résistance ajoutée en vagues:**
+- R_waves = f(vitesse, hauteur significative, angle)
+- Interpolation de données CFD ou expérimentales éparses
+
+**Cartes de consommation:**
+- Fuel = f(vitesse, tirant d'eau, vent, vagues)
+- Jumeaux numériques basés sur trials limités
+
+### Contraintes Industrielles Similaires
+- Essais à la mer coûteux → données éparses
+- Besoin d'interpolation robuste au bruit
+- Incertitude doit être quantifiée pour prise de décision
+- Temps de calcul critique pour routage en temps réel
+
+---
+
+## 🎓 Limitations et Extensions Possibles
+
+### Limitations Actuelles
+- **Scope 2D:** Interpolation sur (V, T) uniquement. Les navires réels dépendent de plus de variables.
+- **Résistance résiduelle seule:** Ne couvre pas résistance totale, windage, ou propulsion.
+- **Échelle yacht:** 10m vs 100-300m pour cargo. Mais physique dimensionless identique.
+- **Proxys (V, T):** Dérivés depuis features adimensionnelles pour démonstration pédagogique.
+
+### Extensions Vers Navires Commerciaux
+Avec accès à données ship:
+- Interpolation 4D-6D: f(vitesse, déplacement, trim, vent, vagues, cap)
+- Intégration de modèles physiques comme priors
+- Interpolation spatio-temporelle pour météo évolutive
+- Fusion multi-source: essais + CFD + opérationnel
+
+### Avantages de la Démarche Progressive
+1. **Synthétique:** Valide que les méthodes fonctionnent (ground truth)
+2. **Yacht UCI:** Démontre applicabilité sur données réelles
+3. **Ship (futur):** Même code, mêmes méthodes, nouvelle données
+
+---
+
+---
+
+## 🎯 Critères de Succès
+
+### Techniques
+- [ ] Les trois méthodes implémentées et fonctionnelles
+- [ ] RMSE sur UCI test set < 0.005 pour la meilleure méthode
+- [ ] Kriging affiche des cartes d'incertitude cohérentes
+- [ ] RBF surpasse Splines sur échantillonnages très épars (<30 points)
+- [ ] Splines est le plus rapide (<0.1s pour 308 points)
+
+### Démonstratifs
+- [ ] Surfaces 3D visuellement lisses et réalistes
+- [ ] Convergence claire: erreur décroît avec plus de points
+- [ ] Recommandations claires par cas d'usage
+
+### Documentation
+- [ ] Équations mathématiques documentées avec références
+- [ ] Justification yacht → ship explicitée
+- [ ] Code reproductible avec requirements.txt
+
+---
+
+## 📚 Références Techniques Clés
+
+### Méthodes d'Interpolation
+- **Kriging:** Matheron (1963) - Principles of geostatistics
+- **RBF:** Buhmann (2003) - Radial Basis Functions: Theory and Implementations
+- **Splines:** De Boor (1978) - A Practical Guide to Splines
+
+### Hydrodynamique
+- **Dataset UCI:** Gerritsma et al. (1981) - Delft yacht series
+- **Froude Scaling:** ITTC guidelines on model-ship correlation
+- **Resistance Prediction:** Holtrop & Mennen (1982) - Statistical re-analysis of resistance data
+
+### Applications Maritimes
+- Plateformes de jumeaux numeriques (digital twins)
+- Weather routing avec données météo éparses
+- Performance monitoring basé sur trials limités
+
+
+
+**Note:** Ce README constitue le cahier des charges du projet. L'implémentation suivra ces spécifications avec du code Python documenté, des notebooks d'analyse, et des visualisations professionnelles.

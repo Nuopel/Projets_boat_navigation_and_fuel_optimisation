@@ -1,0 +1,5 @@
+,PICP,MPIW,R2,Cal_Error
+Quantile (Val),74.54%,2220.83,0.9476,15.46%
+Bootstrap (Val),38.89%,900.87,0.9581,51.11%
+Quantile (Test),80.56%,2291.59,0.9335,9.44%
+Bootstrap (Test),33.33%,842.49,0.9460,56.67%

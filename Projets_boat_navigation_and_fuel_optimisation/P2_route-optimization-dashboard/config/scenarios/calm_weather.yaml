@@ -1,0 +1,36 @@
+# Calm Weather Scenario
+# Baseline scenario with favorable conditions
+
+scenario:
+  name: "Calm Weather Baseline"
+  description: "Favorable conditions with light winds and low waves"
+
+environment:
+  grid:
+    rows: 50
+    cols: 50
+    cell_size: 10.0  # nautical miles per cell
+    origin:
+      x: 0.0
+      y: 0.0
+
+  weather:
+    type: "calm"
+    base_wind_speed: 10.0  # knots
+    base_wave_height: 1.5  # meters
+    smooth_sigma: 2.0  # Gaussian smoothing parameter
+
+route:
+  start:
+    x: 50.0   # nautical miles
+    y: 50.0
+  end:
+    x: 450.0
+    y: 450.0
+
+constraints:
+  time_window:
+    min: null  # No minimum time constraint
+    max: null  # No maximum time constraint
+  min_storm_distance: 50.0  # nautical miles
+  max_wave_height: 6.0  # meters

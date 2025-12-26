@@ -1,0 +1,240 @@
+
+# PROJECT 3: ML-Enhanced Ship Fuel Prediction
+## 📋 Cahier des Charges
+
+### Objectif Principal
+Développer un modèle hybride (physique + ML) pour prédire la consommation de carburant avec quantification d'incertitude.
+
+### Responsabilités du Poste Visées
+- ✅ Machine Learning for predictive modeling (PREFERRED skill)
+- ✅ Data Analysis
+- ✅ Model Validation
+
+### Livrables
+1. **Comparaison de modèles ML** (Linear, XGBoost, Neural Network)
+2. **Modèle hybride** physique + ML
+3. **Quantification d'incertitude** (intervals de confiance)
+4. **Feature importance analysis**
+5. **API de prédiction** (FastAPI)
+
+### Spécifications Techniques
+
+#### Données
+
+**Option A: Dataset Kaggle** (RECOMMANDÉ)
+- **"Propulsion Plant Data Set"** (UCI/Kaggle)
+  - 11k observations de propulsion navale
+  - Features: vitesse, couple, decay coefficient, etc.
+  - Target: consommation fuel
+
+- **"Ship Fuel Consumption Prediction"** (Kaggle)
+  - Plusieurs datasets disponibles
+  - Features météo + opérationnels
+
+**Option B: Données Synthétiques**
+```python
+# Générer avec modèle physique + bruit
+features = {
+    'speed': [5-25 knots],
+    'displacement': [10k-20k tonnes],
+    'draft': [6-10m],
+    'wind_speed': [0-30 m/s],
+    'wave_height': [0-8m],
+    'trim': [-2, +2 m]
+}
+
+target = 'fuel_rate'  # tonnes/hour
+```
+
+#### Architecture des Modèles
+
+**1. Baseline Physique** (si données synthétiques)
+```python
+# Utiliser formule simplifiée comme baseline
+fuel_physics = k * V³ * f(displacement, weather)
+```
+
+**2. Modèles ML à Comparer**
+
+```python
+# Linear Regression (baseline ML)
+from sklearn.linear_model import Ridge, Lasso
+
+# Gradient Boosting (meilleur pour non-linéarités)
+from xgboost import XGBRegressor
+
+# Neural Network
+from sklearn.neural_network import MLPRegressor
+# ou PyTorch pour plus de contrôle
+```
+
+**3. Modèle Hybride** (KEY INNOVATION)
+```python
+# Approche 1: Résidus
+fuel_pred = fuel_physics + ML_model(features)
+
+# Approche 2: Feature engineering
+features_augmented = [..., fuel_physics, ...]
+fuel_pred = ML_model(features_augmented)
+```
+
+#### Quantification d'Incertitude
+
+**Méthode 1: Quantile Regression**
+```python
+# Prédire percentiles 5%, 50%, 95%
+from xgboost import XGBRegressor
+
+model_q50 = XGBRegressor(objective='reg:squarederror')
+model_q05 = XGBRegressor(objective='reg:quantileerror', quantile_alpha=0.05)
+model_q95 = XGBRegressor(objective='reg:quantileerror', quantile_alpha=0.95)
+```
+
+**Méthode 2: Bootstrapping**
+```python
+# Entraîner N modèles sur subsamples
+predictions = [model_i.predict(X) for model_i in models]
+mean_pred = np.mean(predictions, axis=0)
+std_pred = np.std(predictions, axis=0)
+```
+
+**Méthode 3: Neural Network avec incertitude**
+```python
+# Dropout à l'inférence (MC Dropout)
+# ou Gaussian Process layers
+```
+
+#### Métriques de Performance
+
+**Précision:**
+- RMSE, MAE, R²
+- MAPE (Mean Absolute Percentage Error)
+
+**Incertitude:**
+- Calibration plot (predicted uncertainty vs. actual error)
+- Coverage: % de vrais points dans intervals de confiance
+- Sharpness: largeur moyenne des intervals
+
+**Feature Importance:**
+- SHAP values (pour interprétabilité)
+- Permutation importance
+
+### Workflow ML
+
+```python
+# 1. Split data
+train, val, test = split(data, ratios=[0.7, 0.15, 0.15])
+
+# 2. Feature engineering
+features_engineered = create_features(raw_data)
+
+# 3. Train models
+models = {
+    'linear': Ridge(),
+    'xgboost': XGBRegressor(),
+    'nn': MLPRegressor(),
+    'hybrid': HybridModel()
+}
+
+# 4. Hyperparameter tuning (validation set)
+best_params = tune(model, val_set)
+
+# 5. Final evaluation (test set)
+results = evaluate(model, test_set)
+
+# 6. Uncertainty analysis
+intervals = predict_with_uncertainty(model, test_set)
+```
+
+### API Deployment (Bonus)
+
+```python
+# FastAPI endpoint
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.post("/predict")
+def predict_fuel(
+    speed: float,
+    displacement: float,
+    wind_speed: float,
+    ...
+):
+    prediction = model.predict(features)
+    uncertainty = compute_uncertainty(features)
+    return {
+        "fuel_rate": prediction,
+        "confidence_interval": [lower, upper]
+    }
+```
+
+### Structure de Code
+```
+project_3_ml_fuel_prediction/
+├── README.md
+├── data/
+│   ├── raw/                 # Dataset Kaggle
+│   ├── processed/           # Après preprocessing
+│   └── README.md            # Data dictionary
+├── src/
+│   ├── data_preprocessing.py
+│   ├── feature_engineering.py
+│   ├── models/
+│   │   ├── baseline.py
+│   │   ├── xgboost_model.py
+│   │   ├── neural_net.py
+│   │   └── hybrid_model.py
+│   ├── uncertainty.py
+│   ├── evaluation.py
+│   └── api/
+│       └── main.py          # FastAPI app
+├── notebooks/
+│   ├── 01_eda.ipynb
+│   ├── 02_model_training.ipynb
+│   ├── 03_uncertainty_analysis.ipynb
+│   └── 04_results.ipynb
+├── models/
+│   └── trained/             # Saved models
+├── tests/
+│   └── test_models.py
+└── requirements.txt
+```
+
+### Visualisations Attendues
+
+1. **Predicted vs. Actual** (scatter plot)
+2. **Residuals analysis**
+3. **Feature importance** (SHAP waterfall)
+4. **Uncertainty visualization** (prediction intervals)
+5. **Learning curves** (train/val loss)
+6. **Model comparison table**
+
+### Datasets Kaggle Recommandés
+
+1. **"Propulsion Plant Data Set"** ⭐ BEST MATCH
+   - UCI Machine Learning Repository
+   - Real ship propulsion data
+   - https://www.kaggle.com/datasets/uciml/propulsion-plant-data-set
+
+2. **"Ship Fuel Consumption"**
+   - Chercher sur Kaggle: "ship fuel" ou "vessel fuel"
+   - Plusieurs datasets disponibles
+
+3. **Alternative: Créer synthétique**
+   - Avantage: contrôle total, vérité terrain connue
+   - Utiliser Project 0 pour générer
+
+### Critères de Succès
+
+1. Modèle hybride meilleur que ML pur ou physique pur
+2. Incertitudes calibrées (90% CI contient ~90% des points)
+3. Feature importance cohérente avec physique
+4. API fonctionnelle (bonus)
+
+### Timeline
+- **Semaine 1:** EDA, preprocessing, modèles baseline
+- **Semaine 2:** Modèles avancés, incertitude, API
+
+---
+

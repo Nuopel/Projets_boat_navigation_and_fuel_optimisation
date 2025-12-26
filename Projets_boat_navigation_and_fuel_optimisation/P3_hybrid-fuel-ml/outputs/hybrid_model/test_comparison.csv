@@ -1,0 +1,5 @@
+,model,RMSE,MAE,MAPE,R2,Max_Error
+Ridge,Ridge (Test),"1,186.64",772.97,23.76%,0.9468,"5,268.84"
+Residual Hybrid,Residual Hybrid (Test),"1,222.16",682.15,12.68%,0.9436,"5,023.80"
+Feature Hybrid,Feature Hybrid (Test),"1,286.83",707.91,12.57%,0.9375,"6,307.31"
+Physics,Physics (Test),"1,397.56",848.80,15.98%,0.9263,"6,147.08"

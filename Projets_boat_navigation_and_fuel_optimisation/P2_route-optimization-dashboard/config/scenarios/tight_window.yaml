@@ -1,0 +1,47 @@
+# Tight Time Window Scenario
+# Constrained arrival time forces trade-off decisions
+
+scenario:
+  name: "Tight Arrival Window"
+  description: "Moderate weather with strict arrival time constraint"
+
+environment:
+  grid:
+    rows: 50
+    cols: 50
+    cell_size: 10.0  # nautical miles per cell
+    origin:
+      x: 0.0
+      y: 0.0
+
+  weather:
+    type: "moderate"
+    base_wind_speed: 12.0  # knots
+    base_wave_height: 2.5  # meters
+
+    # Moderate weather zone
+    zones:
+      - center:
+          x: 300.0
+          y: 200.0
+        radius: 80.0
+        wind_speed: 20.0  # knots
+        wave_height: 4.0  # meters
+        intensity: 0.7
+
+    smooth_sigma: 2.0
+
+route:
+  start:
+    x: 50.0
+    y: 50.0
+  end:
+    x: 450.0
+    y: 450.0
+
+constraints:
+  time_window:
+    min: 28.0  # Must arrive no earlier than 28 hours
+    max: 32.0  # Must arrive no later than 32 hours
+  min_storm_distance: 50.0
+  max_wave_height: 6.0

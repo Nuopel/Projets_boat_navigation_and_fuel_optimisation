@@ -1,0 +1,177 @@
+
+# PROJECT 2: Multi-Objective Ship Route Optimization
+## 📋 Cahier des Charges
+
+### Objectif Principal
+Optimiser une route maritime selon plusieurs objectifs contradictoires (temps, carburant, émissions) sous contraintes météo.
+
+### Responsabilités du Poste Visées
+- ✅ Optimization techniques (PRIMARY)
+- ✅ Data Analysis (weather data)
+- ✅ Collaboration (Pareto front = outil de décision)
+
+### Livrables
+1. **Algorithme d'optimisation multi-objectif**
+2. **Front de Pareto** visualisé
+3. **Interface interactive** pour explorer trade-offs
+4. **Cas d'étude** : plusieurs scénarios météo
+
+### Spécifications Techniques
+
+#### Problème d'Optimisation
+
+**Variables de décision:**
+- Route: séquence de waypoints (x, y)
+- Vitesse: V(t) le long de la route
+
+**Objectifs (à minimiser):**
+1. Temps de trajet: T_total
+2. Consommation carburant: F_total
+3. Émissions CO2: E_total (proportionnel à F)
+
+**Contraintes:**
+- Fenêtre d'arrivée: T_arrival ∈ [T_min, T_max]
+- Zones météo à éviter: |wave_height| < H_max
+- Vitesse: V_min ≤ V ≤ V_max
+- Obstacles / zones interdites
+
+#### Formulation Mathématique
+
+```
+Minimize: (T_total, F_total, E_total)
+
+Subject to:
+  - Route from A to B
+  - T_min ≤ T_total ≤ T_max
+  - V_min ≤ V(s) ≤ V_max
+  - Avoid storm zones: d(route, storm) > d_safe
+  
+Où:
+  T_total = ∫ ds/V(s)
+  F_total = ∫ fuel_rate(V(s), weather(s)) ds
+  E_total = F_total × emission_factor
+```
+
+#### Données d'Entrée
+
+**Option A: Données Synthétiques** (RECOMMANDÉ)
+```python
+# Grille 2D simplifiée
+domain = (0, 500) × (0, 300)  # nm
+
+# Champs météo synthétiques
+weather_zones = {
+    'zone_1': {'wind': 15, 'waves': 3, 'position': (200, 150)},
+    'zone_2': {'wind': 25, 'waves': 6, 'position': (350, 200)},
+    # Tempête à éviter
+}
+
+# Points départ/arrivée
+start = (50, 50)
+end = (450, 250)
+```
+
+**Option B: Données Réelles**
+- **NOAA GFS** (Global Forecast System) - vent/vagues
+- **Copernicus Marine Service** - données océanographiques
+- **API:** OpenWeather Marine (limité gratuit)
+
+**Kaggle Dataset:**
+- "Ship Fuel Consumption" datasets (multiples disponibles)
+- "Marine Weather Data"
+
+#### Méthodes d'Optimisation
+
+**Approche 1: NSGA-II** (Non-dominated Sorting Genetic Algorithm)
+```python
+from pymoo.algorithms.moo.nsga2 import NSGA2
+from pymoo.optimize import minimize
+
+# Multi-objective evolutionary algorithm
+# Avantage: trouve tout le front de Pareto
+```
+
+**Approche 2: Scalarisation pondérée**
+```python
+# Minimize: w1*T + w2*F + w3*E
+# Varier les poids pour explorer Pareto front
+```
+
+**Approche 3: ε-constraint**
+```python
+# Minimize: F_total
+# Subject to: T_total ≤ T_max, E_total ≤ E_max
+# Varier les contraintes
+```
+
+#### Simplifications Acceptables
+
+**Route discrétisée:**
+- Grille 2D avec cellules
+- A* ou Dijkstra pour pathfinding basique
+- Puis optimisation de vitesse sur le chemin
+
+**Modèle de carburant simplifié:**
+```python
+fuel_rate = a * V³ + weather_penalty(wind, waves)
+# Pas besoin du modèle complet de Project 0
+```
+
+### Visualisations Attendues
+
+1. **Carte de route** avec zones météo colorées
+2. **Front de Pareto** : F vs T, E vs T, F vs E
+3. **Trade-offs** : "gagner 2h coûte +500L de fuel"
+4. **Sensibilité** : impact d'une tempête sur le front
+5. **Animation** : évolution de la route avec différents objectifs
+
+### Structure de Code
+```
+project_2_route_optimization/
+├── README.md
+├── src/
+│   ├── environment.py        # Grille, météo, obstacles
+│   ├── ship_model.py         # Fuel consumption simple
+│   ├── optimizers/
+│   │   ├── nsga2_optimizer.py
+│   │   ├── weighted_sum.py
+│   │   └── epsilon_constraint.py
+│   ├── route_planner.py
+│   └── visualization.py
+├── data/
+│   └── weather_scenarios/    # Plusieurs cas météo
+├── notebooks/
+│   ├── 01_problem_setup.ipynb
+│   ├── 02_optimization_results.ipynb
+│   └── 03_pareto_analysis.ipynb
+└── requirements.txt
+```
+
+### Cas d'Usage à Démontrer
+
+**Scénario 1: Beau temps**
+- Front de Pareto étendu (beaucoup de solutions)
+
+**Scénario 2: Tempête sur route directe**
+- Détour nécessaire, trade-offs plus marqués
+
+**Scénario 3: Fenêtre d'arrivée serrée**
+- Contrainte temporelle limite les options
+
+### Critères de Succès
+
+1. Front de Pareto non-trivial (pas juste 2 points)
+2. Solutions dominent la route directe à vitesse constante
+3. Impact météo visible sur les solutions
+4. Trade-offs quantifiés (ex: "10% fuel → 5% temps")
+
+### Timeline
+- **Semaine 1:** Environnement + optimiseur basique
+- **Semaine 2:** Multi-objectif + Pareto front + visualisations
+
+### Packages Recommandés
+- `pymoo` - multi-objective optimization
+- `scipy.optimize` - single objective
+- `networkx` - pathfinding si route discrétisée
+
+---

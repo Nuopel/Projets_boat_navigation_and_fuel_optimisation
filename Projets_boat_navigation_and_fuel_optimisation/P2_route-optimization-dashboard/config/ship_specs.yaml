@@ -1,0 +1,23 @@
+# Ship Specifications
+# These values will be updated after calibration with real data
+
+ship:
+  name: "Generic Cargo Vessel"
+  v_min: 8.0  # knots - minimum operational speed
+  v_max: 18.0  # knots - maximum operational speed
+
+  # Fuel consumption model: f(V, W, H) = a*V³ + b*W² + c*H + d
+  # Will be calibrated from ship_fuel_efficiency.csv
+  fuel_coefficients:
+    speed_coef: 0.5  # a: L/h per knot³
+    wind_coef: 0.8   # b: L/h per knot²
+    wave_coef: 15.0  # c: L/h per meter
+    base_coef: 500.0 # d: L/h baseline
+
+  emissions:
+    emission_factor: 2.8  # kg CO2 per liter fuel (HFO)
+
+# Operational constraints
+constraints:
+  min_storm_distance: 50.0  # nautical miles
+  max_wave_height: 6.0  # meters

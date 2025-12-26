@@ -1,0 +1,3 @@
+,model,RMSE,MAE,MAPE,R2,Max_Error
+Ridge,Ridge,998.76,666.99,18.97%,0.9526,"4,484.72"
+XGBoost,XGBoost,"1,032.53",619.59,13.74%,0.9494,"4,640.61"
